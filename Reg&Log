@@ -1,0 +1,198 @@
+import java.sql.SQLException;
+import java.util.Scanner;
+
+public class Main {
+
+    public static void main(String[] args) throws SQLException {
+	// write your code here
+
+        Registration reg = new Registration();
+        Login log = new Login();
+
+        Scanner in = new Scanner(System.in);
+
+        while (true){
+            System.out.println("Enter any one \n* L - Login\n* R - Registration \n* E - Exit");
+            char i = Character.toUpperCase(in.next().charAt(0));
+
+            switch (i){
+                case 'R' :
+                    reg.display();
+                    break;
+                case 'L' :
+                     log.display();
+                case 'E':
+                    System.exit(0);
+            }
+        }
+
+    }
+}
+//Registration
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+public class Registration {
+    String Name;
+    String UserName;
+    String Password;
+    String MobileNo;
+    String query = "insert into log values(?,?,?,?);";
+
+    public void display() throws SQLException {
+        Connection con = DBConnective.getConnection();
+        PreparedStatement pst = con.prepareStatement(query);
+
+        Scanner in = new Scanner(System.in);
+
+        System.out.print("Name : ");
+        setName(in.nextLine());
+
+        System.out.print("Username : ");
+        setUserName(in.nextLine());
+
+        System.out.print("Password : ");
+        setPassword(in.nextLine());
+
+        System.out.print("Mobile No : ");
+        setMobileNo(in.nextLine());
+
+        pst.setString(1,getName());
+        pst.setString(2,getUserName());
+        pst.setString(3,getPassword());
+        pst.setString(4,getMobileNo());
+
+        pst.executeUpdate();
+        System.out.println("Registration Successful");
+        System.out.println("Username : " + getUserName());
+        System.out.println("------------------------------------");
+    }
+
+    public String getName() {
+        return Name;
+    }
+
+    public void setName(String name) {
+        Name = name;
+    }
+}
+
+//Login
+
+import java.sql.*;
+import java.util.Scanner;
+
+public class Login {
+    String UserName;
+    String Password;
+
+    public void display() throws SQLException {
+        Scanner in = new Scanner(System.in);
+
+        System.out.print("Username : ");
+        setUserName(in.nextLine());
+
+        System.out.print("Password : ");
+        setPassword(in.nextLine());
+
+        String query;
+        query = "select m_id, pass, mobNo from log where m_id = "+'"'+getUserName()+'"'+";";
+
+        Connection con = DBConnective.getConnection();
+        Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(query);
+
+        rs.next();
+        String u_check = rs.getString(1);
+        String p_check = rs.getString(2);
+        String m_check = rs.getString(3);
+
+        if( u_check.equals ( getUserName() ) && p_check.equals ( getPassword() ) ){
+            System.out.println("Login successful");
+            System.out.println();
+            System.out.println("-------------------------------------------");
+        }
+        else {
+            System.out.println("Invalid username & password");
+            System.out.println("* F - Forget Password");
+            char f = Character.toUpperCase(in.nextLine().charAt(0));
+            if (f == 'F') {
+                System.out.println("Enter Mobile _no");
+                String no = in.nextLine();
+                fCheck(no, m_check, u_check, p_check);
+            } else {
+                System.out.println("Invalid Entered");
+            }
+        }
+    }
+
+    private void fCheck(String no, String m_check, String u_check, String p_check) {
+        if(no.equals(m_check)){
+            System.out.println("UserName : "+u_check);
+            System.out.println("Password : "+p_check);
+        }
+    }
+
+    public String getUserName() {
+        return UserName;
+    }
+
+    public void setUserName(String userName) {
+        UserName = userName;
+    }
+
+    public String getPassword() {
+        return Password;
+    }
+
+    public void setPassword(String password) {
+        Password = password;
+    }
+
+}
+
+
+    public String getUserName() {
+        return UserName;
+    }
+
+    public void setUserName(String userName) {
+        UserName = userName;
+    }
+
+    public String getPassword() {
+        return Password;
+    }
+
+    public void setPassword(String password) {
+        Password = password;
+    }
+
+    public String getMobileNo() {
+        return MobileNo;
+    }
+
+    public void setMobileNo(String mobileNo) {
+        MobileNo = mobileNo;
+    }
+
+
+}
+
+//DBConnective
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class DBConnective {
+    private static final String url = "jdbc:mysql://127.0.0.1:3306/Login";
+    private static final String username = "root";
+    private static final String pass = "Server@2023";
+
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(url,username,pass);
+    }
+}
+
